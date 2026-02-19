@@ -9,7 +9,7 @@
     
     <style>
         /* Basis-Styles falls Tailwind blockiert wird */
-        body { background-color: #0f172a; color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding-bottom: 80px; margin: 0; }
+        body { background-color: #000000; color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding-bottom: 80px; margin: 0; }
         .input-dark { background-color: #1e293b; border: 1px solid #475569; color: white; border-radius: 4px; padding: 6px; width: 100%; box-sizing: border-box; }
         .input-dark:focus { border-color: #eab308; outline: none; }
         .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; margin-bottom: 16px; overflow: hidden; }
@@ -88,6 +88,7 @@
             { value: 'spush_t', label: 'Sled Push Zeit', unit: 'mm:ss', color: '#eab308' },
             { value: 'spull_t', label: 'Sled Pull Zeit', unit: 'mm:ss', color: '#84cc16' },
             { value: 'wed_total', label: 'Mittwoch Runde (Gesamt)', unit: 'mm:ss', color: '#10b981' },
+            { value: 'round_avg', label: 'Rundenzeit Ø', unit: 'mm:ss', color: '#06b6d4' },
         ];
 
         // --- HELPER FUNCTIONS ---
@@ -159,73 +160,71 @@
             if (week <= 4) {
                 const intervalCount = week <= 2 ? "5x" : "6x";
                 return [
-                    { day: "Mo", title: "Threshold Intervals", icon: "timer", exercises: [
+                    { day: "Mo", title: "Threshold Intervals", icon: "timer", roundCount: 1, exercises: [
                         createEx("Intervalle", `${intervalCount} 1000m @ Threshold. Pause 2:00 min.`, iRunPace)
                     ]},
-                    { day: "Di", title: "Cali Strength (Upper)", icon: "dumbbell", exercises: [
+                    { day: "Di", title: "Cali Strength (Upper)", icon: "dumbbell", roundCount: 1, exercises: [
                         createEx("Skill Practice", "20 min Handstand / Front Lever.", []),
                         createEx("A1: Weighted Pull-Ups", "5x5 (RPE 8). Pause 90s.", iPullUps),
                         createEx("A2: Weighted Dips", "5x5. Pause 90s.", iDips),
                         createEx("B1: FL Rows", "4x8-10. Pause 60s.", iRows)
                     ]},
-                    { day: "Mi", title: "Sled & Lunge", icon: "activity", exercises: [
-                        createEx("Info", `${week <= 2 ? '3' : '4'} Runden (Pause 3-4 min). Tracking für EINE Runde.`),
+                    { day: "Mi", title: "Sled & Lunge", icon: "activity", roundCount: week <= 2 ? 3 : 4, exercises: [
+                        createEx("Info", `${week <= 2 ? '3' : '4'} Runden (Pause 3-4 min).`),
                         createEx("1. Run", "1000m (Zone 3)", iWedRun),
                         createEx("2. Sled Push", "50m (160-175kg)", iSledPush),
                         createEx("3. Sled Pull", "50m (103kg)", iSledPull),
                         createEx("4. Lunges", "40m Sandbag Lunges (20kg)", iLunges)
                     ]},
-                    { day: "Do", title: "Zone 2 Recovery", icon: "activity", exercises: [
+                    { day: "Do", title: "Zone 2 Recovery", icon: "activity", roundCount: 1, exercises: [
                         createEx("Dauerlauf", `${week === 1 ? '60' : '75'} min @ HF 130-145.`, iZone2)
                     ]},
-                    { day: "Fr", title: "Leg Strength & Power", icon: "dumbbell", exercises: [
+                    { day: "Fr", title: "Leg Strength & Power", icon: "dumbbell", roundCount: 3, exercises: [
                         createEx("Back Squat", "3x5 (RPE 8). Pause 3-4'.", iSquat),
                         createEx("RDL", "3x8-10. Pause 2'.", iRDL),
                         createEx("Hyrox Zirkel", "3 Runden. Pause 2'.", []),
                         createEx("-> Row", "500m (< 1:50 pace)", iRowErg),
                         createEx("-> Wall Balls", "30 Reps (6kg, Unbroken)", iWallBallTime)
                     ]},
-                    { day: "Sa", title: "Cali Community", icon: "users", exercises: [createEx("Freies Training", "Park. Skills.")] },
-                    { day: "So", title: "Rest Day", icon: "info", exercises: [createEx("Recovery", "Mobility.")] }
+                    { day: "Sa", title: "Cali Community", icon: "users", roundCount: 1, exercises: [createEx("Freies Training", "Park. Skills.")] },
+                    { day: "So", title: "Rest Day", icon: "info", roundCount: 1, exercises: [createEx("Recovery", "Mobility.")] }
                 ];
             }
-            // --- PHASE 2 ---
             if (week <= 8) {
                 return [
-                    { day: "Mo", title: "Rochade Intervals", icon: "timer", exercises: [
+                    { day: "Mo", title: "Rochade Intervals", icon: "timer", roundCount: 4, exercises: [
                         createEx("4 Runden", "1k Race Pace + Burpees/WB. Pause 2 min.", iRunPace)
                     ]},
-                    { day: "Di", title: "Cali Variation", icon: "dumbbell", exercises: [
+                    { day: "Di", title: "Cali Variation", icon: "dumbbell", roundCount: 1, exercises: [
                         createEx("Skill Practice", "Wie Phase 1.", []),
                         createEx("Explosive Pull-Ups", "5x5 (Speed!).", iPullUps),
                         createEx("Ring Dips", "5x5 (Stabilität).", iDips)
                     ]},
-                    { day: "Mi", title: "Sim 'The Sandwich'", icon: "activity", exercises: [
+                    { day: "Mi", title: "Sim 'The Sandwich'", icon: "activity", roundCount: 1, exercises: [
                         createEx("Ablauf", "1k Run -> 1k Ski -> 1k Run -> Push -> 1k Run -> Pull -> 1k Run", []),
                         createEx("Sled Push", "50m (152kg)", iSledPush),
                         createEx("Sled Pull", "50m (103kg)", iSledPull)
                     ]},
-                    { day: "Do", title: "Zone 2 Long", icon: "activity", exercises: [
+                    { day: "Do", title: "Zone 2 Long", icon: "activity", roundCount: 1, exercises: [
                         createEx("Dauerlauf", "70-80 min. Optional Lunges.", iZone2)
                     ]},
-                    { day: "Fr", title: "Heavy Carries & WB", icon: "dumbbell", exercises: [
+                    { day: "Fr", title: "Heavy Carries & WB", icon: "dumbbell", roundCount: 1, exercises: [
                         createEx("Deadlift", "3x3-5 (RPE 9).", iDeadlift),
                         createEx("Farmers Carry", "4x40m (Schwer!).", iCarry),
                         createEx("Finisher (75 WB)", "Zeit stoppen.", iKaren)
                     ]},
-                    { day: "Sa", title: "Cali Community", icon: "users", exercises: [createEx("Freies Training", "Park.")] },
-                    { day: "So", title: "Rest Day", icon: "info", exercises: [createEx("Recovery", "Mobility.")] }
+                    { day: "Sa", title: "Cali Community", icon: "users", roundCount: 1, exercises: [createEx("Freies Training", "Park.")] },
+                    { day: "So", title: "Rest Day", icon: "info", roundCount: 1, exercises: [createEx("Recovery", "Mobility.")] }
                 ];
             }
-            // --- PHASE 3 ---
             return [
-                { day: "Mo", title: week === 12 ? "Taper Sprints" : "Intervals Peak", icon: "timer", exercises: [createEx("Laufen", "Intensität hoch.", iRunPace)] },
-                { day: "Di", title: "Skill Flow", icon: "dumbbell", exercises: [createEx("Skill", "Leicht, 'Flow'.", [])] },
-                { day: "Mi", title: week === 12 ? "Mobility" : "Speed Work", icon: "activity", exercises: [createEx("Sleds", "Sprints.", [])] },
-                { day: "Do", title: week === 12 ? "REST" : "Zone 2", icon: "activity", exercises: [createEx("Laufen", "Locker.", [])] },
-                { day: "Fr", title: week === 12 ? "Shakeout" : "Big Sim", icon: "trophy", exercises: [createEx("Hyrox", "Simulation.", iWallBallTime)] },
-                { day: "Sa", title: "Rest", icon: "info", exercises: [createEx("Mental", "Vorbereitung.", [])] },
-                { day: "So", title: week === 12 ? "RACE DAY!" : "Rest", icon: "trophy", exercises: [createEx("Race", "Viel Erfolg!", [])] }
+                { day: "Mo", title: week === 12 ? "Taper Sprints" : "Intervals Peak", icon: "timer", roundCount: 1, exercises: [createEx("Laufen", "Intensität hoch.", iRunPace)] },
+                { day: "Di", title: "Skill Flow", icon: "dumbbell", roundCount: 1, exercises: [createEx("Skill", "Leicht, 'Flow'.", [])] },
+                { day: "Mi", title: week === 12 ? "Mobility" : "Speed Work", icon: "activity", roundCount: 1, exercises: [createEx("Sleds", "Sprints.", [])] },
+                { day: "Do", title: week === 12 ? "REST" : "Zone 2", icon: "activity", roundCount: 1, exercises: [createEx("Laufen", "Locker.", [])] },
+                { day: "Fr", title: week === 12 ? "Shakeout" : "Big Sim", icon: "trophy", roundCount: 1, exercises: [createEx("Hyrox", "Simulation.", iWallBallTime)] },
+                { day: "Sa", title: "Rest", icon: "info", roundCount: 1, exercises: [createEx("Mental", "Vorbereitung.", [])] },
+                { day: "So", title: week === 12 ? "RACE DAY!" : "Rest", icon: "trophy", roundCount: 1, exercises: [createEx("Race", "Viel Erfolg!", [])] }
             ];
         }
 
@@ -238,24 +237,23 @@
             expandedDay: null,
             logs: {},
             selectedStat: 'run_pace',
+            customExercises: {},
+            timers: {},
+            ticker: null,
 
             init() {
                 try {
-                    // Inject Header Icon
                     document.getElementById('header-title').insertAdjacentHTML('afterbegin', ICONS.trophy);
-
-                    // Load logs
                     const saved = SafeStorage.getItem('hyrox_logs');
                     if (saved) this.logs = JSON.parse(saved);
-                    
-                    // Load last state
+                    const custom = SafeStorage.getItem('hyrox_custom_exercises');
+                    if (custom) this.customExercises = JSON.parse(custom);
                     const savedState = SafeStorage.getItem('hyrox_state');
                     if (savedState) {
                         const state = JSON.parse(savedState);
                         this.currentWeek = state.currentWeek || 1;
                         this.activeTab = state.activeTab || 'plan';
                     }
-
                     this.render();
                 } catch (e) {
                     console.error("Critical Init Error:", e);
@@ -266,6 +264,7 @@
 
             save() {
                 SafeStorage.setItem('hyrox_logs', JSON.stringify(this.logs));
+                SafeStorage.setItem('hyrox_custom_exercises', JSON.stringify(this.customExercises));
                 SafeStorage.setItem('hyrox_state', JSON.stringify({
                     currentWeek: this.currentWeek,
                     activeTab: this.activeTab
@@ -276,15 +275,8 @@
                 this.activeTab = tab;
                 const btnPlan = document.getElementById('btn-plan');
                 const btnStats = document.getElementById('btn-stats');
-                
-                if (tab === 'plan') {
-                    btnPlan.className = "btn btn-active";
-                    btnStats.className = "btn btn-inactive";
-                } else {
-                    btnPlan.className = "btn btn-inactive";
-                    btnStats.className = "btn btn-active";
-                }
-                
+                btnPlan.className = tab === 'plan' ? "btn btn-active" : "btn btn-inactive";
+                btnStats.className = tab === 'stats' ? "btn btn-active" : "btn btn-inactive";
                 this.save();
                 this.render();
             },
@@ -305,9 +297,90 @@
             },
 
             handleInput(dayIdx, inputId, value) {
-                const key = `${this.currentWeek}-${dayIdx}-${inputId}`;
-                this.logs[key] = value;
+                this.logs[`${this.currentWeek}-${dayIdx}-${inputId}`] = value;
                 this.save();
+            },
+
+            getTimerId(dayIdx, exIdx, kind = 'ex') {
+                return `${this.currentWeek}-${dayIdx}-${kind}-${exIdx}`;
+            },
+
+            getTimerValue(timerId) {
+                const t = this.timers[timerId];
+                if (!t) return 0;
+                return t.elapsed + (t.running ? (Date.now() - t.startedAt) : 0);
+            },
+
+            formatTimer(ms) {
+                return secondsToTime(ms / 1000) || '0:00';
+            },
+
+            startTimer(dayIdx, exIdx, kind = 'ex') {
+                const id = this.getTimerId(dayIdx, exIdx, kind);
+                const t = this.timers[id] || { elapsed: 0, running: false, startedAt: null };
+                if (!t.running) {
+                    t.running = true;
+                    t.startedAt = Date.now();
+                }
+                this.timers[id] = t;
+                this.ensureTicker();
+                this.render();
+            },
+
+            pauseTimer(dayIdx, exIdx, kind = 'ex') {
+                const id = this.getTimerId(dayIdx, exIdx, kind);
+                const t = this.timers[id];
+                if (t && t.running) {
+                    t.elapsed += Date.now() - t.startedAt;
+                    t.running = false;
+                    t.startedAt = null;
+                    this.render();
+                }
+            },
+
+            resetTimer(dayIdx, exIdx, kind = 'ex') {
+                this.timers[this.getTimerId(dayIdx, exIdx, kind)] = { elapsed: 0, running: false, startedAt: null };
+                this.render();
+            },
+
+            applyTimerToInput(dayIdx, exIdx, inputId, kind = 'ex') {
+                const seconds = Math.round(this.getTimerValue(this.getTimerId(dayIdx, exIdx, kind)) / 1000);
+                this.handleInput(dayIdx, inputId, secondsToTime(seconds));
+                this.render();
+            },
+
+            addRoundTime(dayIdx, roundIdx) {
+                this.applyTimerToInput(dayIdx, 0, `round_${roundIdx}_t`, 'round');
+            },
+
+            addCustomExercise(dayIdx) {
+                const key = `${this.currentWeek}-${dayIdx}`;
+                if (!this.customExercises[key]) this.customExercises[key] = [];
+                this.customExercises[key].push({ id: Date.now(), name: 'Eigene Übung', details: '' });
+                this.save();
+                this.render();
+            },
+
+            updateCustomExercise(dayIdx, customId, field, value) {
+                const key = `${this.currentWeek}-${dayIdx}`;
+                const list = this.customExercises[key] || [];
+                const item = list.find(ex => ex.id === customId);
+                if (item) {
+                    item[field] = value;
+                    this.save();
+                }
+            },
+
+            ensureTicker() {
+                if (this.ticker) return;
+                this.ticker = setInterval(() => {
+                    if (!Object.values(this.timers).some(t => t.running)) {
+                        clearInterval(this.ticker);
+                        this.ticker = null;
+                        return;
+                    }
+                    this.render();
+                }, 1000);
             },
 
             setStat(val) {
@@ -315,152 +388,151 @@
                 this.render();
             },
 
-            render() {
-                try {
-                    const container = document.getElementById('app-container');
-                    container.innerHTML = '';
+            renderTimerControls(dayIdx, exIdx, inputId, kind = 'ex') {
+                const timerId = this.getTimerId(dayIdx, exIdx, kind);
+                const timerVal = this.formatTimer(this.getTimerValue(timerId));
+                return `
+                    <div class="mt-3 p-2 bg-black/30 rounded border border-slate-700">
+                        <div class="text-xs text-slate-400 mb-2">Timer: <span class="font-mono text-yellow-400">${timerVal}</span></div>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="app.startTimer(${dayIdx}, ${exIdx}, '${kind}')" class="px-2 py-1 text-xs bg-emerald-700 rounded">Start</button>
+                            <button onclick="app.pauseTimer(${dayIdx}, ${exIdx}, '${kind}')" class="px-2 py-1 text-xs bg-amber-700 rounded">Pause</button>
+                            <button onclick="app.resetTimer(${dayIdx}, ${exIdx}, '${kind}')" class="px-2 py-1 text-xs bg-slate-700 rounded">Reset</button>
+                            ${inputId ? `<button onclick="app.applyTimerToInput(${dayIdx}, ${exIdx}, '${inputId}', '${kind}')" class="px-2 py-1 text-xs bg-blue-700 rounded">In Zeitfeld übernehmen</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            },
 
-                    if (this.activeTab === 'plan') {
-                        this.renderPlan(container);
-                    } else {
-                        this.renderStats(container);
-                    }
-                } catch (e) {
-                    console.error("Render Error:", e);
-                    document.getElementById('error-container').innerText = "Render Fehler: " + e.message;
-                    document.getElementById('error-container').classList.remove('hidden');
-                }
+            render() {
+                const container = document.getElementById('app-container');
+                container.innerHTML = '';
+                if (this.activeTab === 'plan') this.renderPlan(container);
+                else this.renderStats(container);
             },
 
             renderPlan(container) {
                 const phase = getPhaseForWeek(this.currentWeek);
                 const workouts = getWorkoutsForWeek(this.currentWeek);
-
-                // Phase Card
                 const phaseHTML = `
-                    <div class="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-2xl p-6 mb-6 shadow-lg relative overflow-hidden">
+                    <div class="bg-gradient-to-br from-black to-slate-900 border border-slate-700 rounded-2xl p-6 mb-6 shadow-lg relative overflow-hidden">
                         <div class="absolute top-0 right-0 w-32 h-32 bg-yellow-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
                         <div class="flex justify-between items-start mb-2 relative z-10">
                             <h2 class="text-xl font-bold text-yellow-400">${phase.name}</h2>
                             <span class="bg-yellow-500/20 text-yellow-400 text-xs font-bold px-3 py-1 rounded-full border border-yellow-500/20">Woche ${this.currentWeek}</span>
                         </div>
                         <p class="text-slate-300 font-light text-sm relative z-10">${phase.focus}</p>
-                    </div>
-                `;
-
-                // Navigation
+                    </div>`;
                 const navHTML = `
-                    <div class="flex justify-between items-center mb-6 bg-slate-800 p-2 rounded-xl border border-slate-700">
+                    <div class="flex justify-between items-center mb-6 bg-slate-900 p-2 rounded-xl border border-slate-700">
                         <button onclick="app.changeWeek(-1)" ${this.currentWeek === 1 ? 'disabled' : ''} class="p-3 hover:bg-slate-700 rounded-lg disabled:opacity-30 text-white">${ICONS.chevronLeft}</button>
                         <span class="font-mono font-bold text-lg text-white">Woche ${this.currentWeek}</span>
                         <button onclick="app.changeWeek(1)" ${this.currentWeek === this.totalWeeks ? 'disabled' : ''} class="p-3 hover:bg-slate-700 rounded-lg disabled:opacity-30 text-white">${ICONS.chevronRight}</button>
-                    </div>
-                `;
+                    </div>`;
 
-                // Workouts
                 let workoutsHTML = '<div class="space-y-4">';
                 workouts.forEach((workout, dayIdx) => {
                     const isExpanded = this.expandedDay === dayIdx;
-                    const hasInput = workout.exercises.some(ex => ex.inputs.length > 0);
-                    const hasData = workout.exercises.some(ex => ex.inputs.some(inp => this.logs[`${this.currentWeek}-${dayIdx}-${inp.id}`]));
-                    
-                    // Icon logic
-                    let iconSvg = "";
-                    if (workout.icon === 'timer') iconSvg = ICONS.timer;
-                    else if (workout.icon === 'dumbbell') iconSvg = ICONS.dumbbell;
-                    else if (workout.icon === 'activity') iconSvg = ICONS.activity;
-                    else if (workout.icon === 'users') iconSvg = ICONS.users;
-                    else if (workout.icon === 'info') iconSvg = ICONS.info;
-                    else if (workout.icon === 'trophy') iconSvg = ICONS.trophy;
+                    const customKey = `${this.currentWeek}-${dayIdx}`;
+                    const customForDay = this.customExercises[customKey] || [];
+                    const allExercises = workout.exercises.concat(customForDay.map(ex => ({ ...ex, isCustom: true, inputs: [{ id: `custom_${ex.id}_t`, ...METRICS.time, placeholder: '02:30' }] })));
+                    const hasData = allExercises.some(ex => ex.inputs?.some(inp => this.logs[`${this.currentWeek}-${dayIdx}-${inp.id}`]));
+                    let iconSvg = ICONS[workout.icon] || ICONS.info;
 
                     workoutsHTML += `
-                        <div class="card bg-slate-800 border ${hasData ? 'border-yellow-500/40' : 'border-slate-700'}">
-                            <div class="p-4 flex items-center gap-4 cursor-pointer hover:bg-slate-700/50" onclick="app.toggleExpand(${dayIdx})">
-                                <div class="p-2 rounded-lg ${hasData ? 'bg-yellow-500 text-slate-900' : 'bg-slate-700 text-slate-400'}">
-                                    ${iconSvg}
-                                </div>
+                        <div class="card bg-slate-900 border ${hasData ? 'border-yellow-500/40' : 'border-slate-700'}">
+                            <div class="p-4 flex items-center gap-4 cursor-pointer hover:bg-slate-800/50" onclick="app.toggleExpand(${dayIdx})">
+                                <div class="p-2 rounded-lg ${hasData ? 'bg-yellow-500 text-slate-900' : 'bg-slate-700 text-slate-400'}">${iconSvg}</div>
                                 <div class="flex-grow">
                                     <div class="flex justify-between items-center">
                                         <h3 class="font-bold text-base text-slate-100">${workout.day}: ${workout.title}</h3>
                                         <div class="text-slate-500">${isExpanded ? ICONS.chevronUp : ICONS.chevronDown}</div>
                                     </div>
-                                    ${!isExpanded ? `
-                                        <div class="flex gap-2 mt-1">
-                                            <span class="text-[10px] bg-slate-900 px-2 py-0.5 rounded text-slate-400 uppercase tracking-wider">${workout.exercises.length} Übungen</span>
-                                            ${hasInput ? '<span class="text-[10px] bg-yellow-900/30 text-yellow-500 px-2 py-0.5 rounded uppercase tracking-wider">Tracking</span>' : ''}
-                                        </div>
-                                    ` : ''}
                                 </div>
                             </div>
-                            
+
                             ${isExpanded ? `
                                 <div class="border-t border-slate-700/50 bg-slate-900/30">
-                                    ${workout.exercises.map(ex => `
+                                    ${workout.roundCount > 1 ? `
+                                        <div class="p-4 border-b border-slate-700/50 bg-black/30">
+                                            <h4 class="font-bold text-cyan-400 text-sm mb-2">Rundenzeiten (${workout.roundCount} Runden)</h4>
+                                            ${this.renderTimerControls(dayIdx, 0, null, 'round')}
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+                                                ${Array.from({ length: workout.roundCount }, (_, roundIdx) => {
+                                                    const id = `round_${roundIdx + 1}_t`;
+                                                    const val = this.logs[`${this.currentWeek}-${dayIdx}-${id}`] || '';
+                                                    return `<div class="bg-slate-900 p-2 rounded border border-slate-700">
+                                                        <label class="text-xs text-slate-400 block mb-1">Runde ${roundIdx + 1}</label>
+                                                        <div class="flex gap-2">
+                                                            <input class="input-dark font-mono text-sm" placeholder="02:30" value="${val}" onchange="app.handleInput(${dayIdx}, '${id}', this.value)">
+                                                            <button class="px-2 text-xs bg-blue-700 rounded" onclick="app.addRoundTime(${dayIdx}, ${roundIdx + 1})">Timer →</button>
+                                                        </div>
+                                                    </div>`;
+                                                }).join('')}
+                                            </div>
+                                        </div>
+                                    ` : ''}
+
+                                    ${allExercises.map((ex, exIdx) => `
                                         <div class="p-4 border-b border-slate-700/50 last:border-0">
-                                            <h4 class="font-bold text-yellow-500 text-sm mb-1">${ex.name}</h4>
-                                            <p class="text-sm text-slate-300 leading-snug mb-3">${ex.details}</p>
-                                            
-                                            ${ex.inputs.length > 0 ? `
-                                                <div class="flex flex-wrap gap-3">
-                                                    ${ex.inputs.map(input => {
-                                                        const val = this.logs[`${this.currentWeek}-${dayIdx}-${input.id}`] || '';
-                                                        return `
-                                                            <div class="${input.width || 'w-24'}">
-                                                                <label class="text-[10px] uppercase font-bold text-slate-500 mb-1 block">${input.label}</label>
-                                                                <div class="relative">
-                                                                    <input 
-                                                                        type="${input.type === 'time' ? 'text' : 'number'}" 
-                                                                        inputmode="${input.type === 'time' ? 'text' : 'decimal'}"
-                                                                        placeholder="${input.placeholder}"
-                                                                        value="${val}"
-                                                                        onchange="app.handleInput(${dayIdx}, '${input.id}', this.value)"
-                                                                        class="w-full input-dark font-mono text-sm"
-                                                                    >
-                                                                    <span class="absolute right-2 top-1.5 text-[10px] text-slate-500 pointer-events-none">${input.unit}</span>
-                                                                </div>
-                                                            </div>
-                                                        `;
-                                                    }).join('')}
-                                                </div>
-                                            ` : ''}
+                                            <input ${ex.isCustom ? '' : 'readonly'} value="${ex.name}" onchange="app.updateCustomExercise(${dayIdx}, ${ex.id || 0}, 'name', this.value)" class="font-bold text-yellow-500 text-sm mb-1 bg-transparent w-full">
+                                            <textarea ${ex.isCustom ? '' : 'readonly'} onchange="app.updateCustomExercise(${dayIdx}, ${ex.id || 0}, 'details', this.value)" class="text-sm text-slate-300 leading-snug mb-3 w-full bg-transparent resize-y">${ex.details || ''}</textarea>
+                                            ${ex.inputs.length > 0 ? `<div class="flex flex-wrap gap-3">${ex.inputs.map(input => {
+                                                const val = this.logs[`${this.currentWeek}-${dayIdx}-${input.id}`] || '';
+                                                return `<div class="${input.width || 'w-24'}"><label class="text-[10px] uppercase font-bold text-slate-500 mb-1 block">${input.label}</label><div class="relative"><input type="${input.type === 'text' ? 'text' : 'number'}" inputmode="${input.type === 'text' ? 'text' : 'decimal'}" placeholder="${input.placeholder}" value="${val}" onchange="app.handleInput(${dayIdx}, '${input.id}', this.value)" class="w-full input-dark font-mono text-sm"><span class="absolute right-2 top-1.5 text-[10px] text-slate-500 pointer-events-none">${input.unit}</span></div></div>`;
+                                            }).join('')}</div>` : ''}
+                                            ${this.renderTimerControls(dayIdx, exIdx, ex.inputs.find(i => i.unit === 'mm:ss')?.id)}
                                         </div>
                                     `).join('')}
+                                    <div class="p-4">
+                                        <button onclick="app.addCustomExercise(${dayIdx})" class="w-full py-2 rounded bg-slate-800 border border-dashed border-slate-600 text-sm text-slate-300">+ Eigene Übung hinzufügen</button>
+                                    </div>
                                 </div>
                             ` : ''}
-                        </div>
-                    `;
+                        </div>`;
                 });
                 workoutsHTML += '</div>';
-
                 container.innerHTML = phaseHTML + navHTML + workoutsHTML;
+            },
+
+            estimateHyroxTime() {
+                const defaults = { run: 270, ski: 280, row: 250, sledPush: 210, sledPull: 220, burpee: 230, farmer: 180, lunge: 220, wallBall: 260 };
+                const sec = {
+                    run: timeToSeconds(this.logs[`${this.currentWeek}-2-wed_run_t`]) || defaults.run,
+                    sledPush: timeToSeconds(this.logs[`${this.currentWeek}-2-spush_t`]) || defaults.sledPush,
+                    sledPull: timeToSeconds(this.logs[`${this.currentWeek}-2-spull_t`]) || defaults.sledPull,
+                    lunge: timeToSeconds(this.logs[`${this.currentWeek}-2-lng_t`]) || defaults.lunge,
+                    wallBall: timeToSeconds(this.logs[`${this.currentWeek}-4-wb_t`]) || timeToSeconds(this.logs[`${this.currentWeek}-4-karen_t`]) || defaults.wallBall,
+                    row: timeToSeconds(this.logs[`${this.currentWeek}-4-row_t`]) || defaults.row
+                };
+                const runPace = timeToSeconds(this.logs[`${this.currentWeek}-0-run_pace`]);
+                const runSplit = runPace ? runPace : 290;
+                const total = (runSplit * 8) + sec.sledPush + sec.sledPull + sec.lunge + sec.row + sec.wallBall + defaults.ski + defaults.burpee + defaults.farmer;
+                return {
+                    total,
+                    confidence: Object.values(sec).filter(v => v !== undefined).length
+                };
             },
 
             renderStats(container) {
                 const chartData = this.getChartData();
                 const currentConfig = STAT_OPTIONS.find(s => s.value === this.selectedStat);
-
-                let optionsHTML = STAT_OPTIONS.map(opt => 
-                    `<option value="${opt.value}" ${this.selectedStat === opt.value ? 'selected' : ''}>${opt.label}</option>`
-                ).join('');
-
+                const ai = this.estimateHyroxTime();
+                let optionsHTML = STAT_OPTIONS.map(opt => `<option value="${opt.value}" ${this.selectedStat === opt.value ? 'selected' : ''}>${opt.label}</option>`).join('');
                 container.innerHTML = `
-                    <div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl shadow-xl">
+                    <div class="bg-slate-900 border border-slate-700 p-6 rounded-2xl shadow-xl">
+                        <div class="mb-6 p-4 rounded-xl border border-violet-700/50 bg-violet-900/20">
+                            <h3 class="text-lg font-bold text-violet-300 mb-2">KI-gestützte Hyrox-Prognose</h3>
+                            <p class="text-2xl font-mono text-white">${secondsToTime(ai.total)}</p>
+                            <p class="text-xs text-slate-400 mt-1">Basierend auf deinen aktuellen Trainingswerten der Woche ${this.currentWeek}.</p>
+                        </div>
                         <div class="flex flex-col gap-4 mb-6">
-                            <div class="flex items-center gap-2 text-white">
-                                ${ICONS.barChart}
-                                <h3 class="text-lg font-bold">Fortschritt</h3>
-                            </div>
-                            <select onchange="app.setStat(this.value)" class="bg-slate-900 text-white border border-slate-600 rounded px-3 py-2 text-sm font-bold w-full">
-                                ${optionsHTML}
-                            </select>
+                            <div class="flex items-center gap-2 text-white">${ICONS.barChart}<h3 class="text-lg font-bold">Fortschritt</h3></div>
+                            <select onchange="app.setStat(this.value)" class="bg-slate-900 text-white border border-slate-600 rounded px-3 py-2 text-sm font-bold w-full">${optionsHTML}</select>
                         </div>
-                        
-                        <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700/50">
-                            ${this.renderChart(chartData, currentConfig)}
-                        </div>
-                        <p class="text-xs text-slate-500 mt-4 text-center">Zeiten als MM:SS oder Sekunden eingeben.</p>
-                    </div>
-                `;
+                        <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700/50">${this.renderChart(chartData, currentConfig)}</div>
+                        <p class="text-xs text-slate-500 mt-4 text-center">Runden-Ø wird automatisch aus den einzelnen Rundenzeiten berechnet.</p>
+                    </div>`;
             },
 
             getChartData() {
@@ -470,19 +542,20 @@
                         const key = Object.keys(this.logs).find(k => k.startsWith(`${w}-`) && k.endsWith(`-${suffix}`));
                         return key ? this.logs[key] : null;
                     };
-                    
                     let val = null;
                     const type = this.selectedStat;
-
                     if (type === 'wed_total') {
                         const run = timeToSeconds(findVal('wed_run_t'));
                         const push = timeToSeconds(findVal('spush_t'));
                         const pull = timeToSeconds(findVal('spull_t'));
                         const lunge = timeToSeconds(findVal('lng_t'));
                         if (run && push && pull && lunge) val = run + push + pull + lunge;
-                    }
-                    else if (type.endsWith('_vol')) {
-                        const base = type.split('_')[0]; 
+                    } else if (type === 'round_avg') {
+                        const roundKeys = Object.keys(this.logs).filter(k => k.startsWith(`${w}-`) && k.includes('round_') && k.endsWith('_t'));
+                        const roundValues = roundKeys.map(k => timeToSeconds(this.logs[k])).filter(Boolean);
+                        if (roundValues.length) val = roundValues.reduce((a,b)=>a+b,0) / roundValues.length;
+                    } else if (type.endsWith('_vol')) {
+                        const base = type.split('_')[0];
                         const weight = findVal(`${base}_w`);
                         const reps = findVal(`${base}_r`);
                         if (weight && reps) val = parseFloat(weight) * parseFloat(reps);
@@ -490,53 +563,22 @@
                         const raw = findVal(type);
                         if (raw) val = timeToSeconds(raw);
                     }
-                    
                     if (val !== null && !isNaN(val)) data.push({ week: w, value: val });
                 }
                 return data;
             },
 
             renderChart(data, config) {
+                if (!config) return '<div class="text-slate-500 text-xs p-8 text-center">Keine Konfiguration.</div>';
                 if (data.length < 2) return '<div class="text-slate-500 text-xs p-8 text-center">Benötige mind. 2 Einträge für Grafik.</div>';
-
-                const height = 200;
-                const width = 600;
-                const padding = 40;
-                const xValues = data.map(d => d.week);
-                const yValues = data.map(d => d.value);
-                const minX = Math.min(...xValues);
-                const maxX = Math.max(...xValues);
-                const minY = Math.min(...yValues) * 0.95;
-                const maxY = Math.max(...yValues) * 1.05;
-
+                const height = 200, width = 600, padding = 40;
+                const xValues = data.map(d => d.week), yValues = data.map(d => d.value);
+                const minX = Math.min(...xValues), maxX = Math.max(...xValues), minY = Math.min(...yValues) * 0.95, maxY = Math.max(...yValues) * 1.05;
                 const getX = (val) => ((val - minX) / (maxX - minX || 1)) * (width - 2 * padding) + padding;
                 const getY = (val) => height - (((val - minY) / (maxY - minY || 1)) * (height - 2 * padding) + padding);
                 const formatY = (val) => config.unit === 'mm:ss' || config.unit === 'min/km' ? secondsToTime(val) : Math.round(val);
-
                 const points = data.map(d => `${getX(d.week)},${getY(d.value)}`).join(' ');
-
-                return `
-                    <div class="relative w-full aspect-[3/1] min-h-[150px]">
-                        <div class="flex justify-between items-end mb-2 absolute -top-8 w-full">
-                            <span class="text-xs text-slate-400 font-mono">${config.unit}</span>
-                        </div>
-                        <svg viewBox="0 0 ${width} ${height}" class="w-full h-full overflow-visible">
-                            ${[0, 0.5, 1].map(pct => {
-                                const yVal = minY + (maxY - minY) * pct;
-                                const yPos = getY(yVal);
-                                return `<line x1="${padding}" y1="${yPos}" x2="${width - padding}" y2="${yPos}" stroke="#334155" stroke-width="1" stroke-dasharray="4 4" />
-                                        <text x="${padding - 10}" y="${yPos + 4}" text-anchor="end" fill="#64748b" font-size="10">${formatY(yVal)}</text>`;
-                            }).join('')}
-                            
-                            <polyline fill="none" stroke="${config.color}" stroke-width="3" points="${points}" stroke-linecap="round" stroke-linejoin="round" />
-                            
-                            ${data.map(d => `
-                                <circle cx="${getX(d.week)}" cy="${getY(d.value)}" r="5" fill="#1e293b" stroke="${config.color}" stroke-width="2" />
-                                <text x="${getX(d.week)}" y="${height - 10}" text-anchor="middle" fill="#94a3b8" font-size="10">W${d.week}</text>
-                            `).join('')}
-                        </svg>
-                    </div>
-                `;
+                return `<div class="relative w-full aspect-[3/1] min-h-[150px]"><svg viewBox="0 0 ${width} ${height}" class="w-full h-full overflow-visible">${[0, 0.5, 1].map(pct => { const yVal = minY + (maxY - minY) * pct; const yPos = getY(yVal); return `<line x1="${padding}" y1="${yPos}" x2="${width - padding}" y2="${yPos}" stroke="#334155" stroke-width="1" stroke-dasharray="4 4" /><text x="${padding - 10}" y="${yPos + 4}" text-anchor="end" fill="#64748b" font-size="10">${formatY(yVal)}</text>`; }).join('')}<polyline fill="none" stroke="${config.color}" stroke-width="3" points="${points}" stroke-linecap="round" stroke-linejoin="round" />${data.map(d => `<circle cx="${getX(d.week)}" cy="${getY(d.value)}" r="5" fill="#1e293b" stroke="${config.color}" stroke-width="2" /><text x="${getX(d.week)}" y="${height - 10}" text-anchor="middle" fill="#94a3b8" font-size="10">W${d.week}</text>`).join('')}</svg></div>`;
             }
         };
 
