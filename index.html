@@ -4,39 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hyrox Hybrid Plan</title>
-    <!-- Tailwind CSS (CDN) - Falls das nicht lädt, haben wir Fallback-Styles -->
+    <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
-        /* Basis-Styles falls Tailwind blockiert wird */
-        body { background-color: #0f172a; color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding-bottom: 80px; margin: 0; }
-        .input-dark { background-color: #1e293b; border: 1px solid #475569; color: white; border-radius: 4px; padding: 6px; width: 100%; box-sizing: border-box; }
+        body { background-color: #18181b; color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding-bottom: 100px; margin: 0; }
+        .input-dark { background-color: #27272a; border: 1px solid #3f3f46; color: white; border-radius: 4px; padding: 6px; width: 100%; box-sizing: border-box; }
         .input-dark:focus { border-color: #eab308; outline: none; }
-        .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; margin-bottom: 16px; overflow: hidden; }
+        .card { background-color: #27272a; border: 1px solid #3f3f46; border-radius: 12px; margin-bottom: 16px; overflow: hidden; }
         .btn { cursor: pointer; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 12px; border: none; }
-        .btn-active { background-color: #eab308; color: #0f172a; }
-        .btn-inactive { background-color: transparent; color: #94a3b8; }
+        .btn-active { background-color: #eab308; color: #18181b; }
+        .btn-inactive { background-color: transparent; color: #a1a1aa; }
         
-        /* Utility overrides */
         input[type="number"] { -moz-appearance: textfield; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        /* Modal Background Blur */
+        .modal-bg { backdrop-filter: blur(4px); }
     </style>
 </head>
 <body>
 
     <!-- Header -->
-    <div class="bg-slate-800 border-b border-slate-700 p-4 sticky top-0 z-50 shadow-xl">
+    <div class="bg-zinc-800 border-b border-zinc-700 p-4 sticky top-0 z-40 shadow-xl">
         <div class="flex flex-col gap-3 max-w-3xl mx-auto">
             <div class="flex justify-between items-center">
                 <div>
                     <h1 class="text-lg font-bold flex items-center gap-2 text-white" id="header-title">
-                        <!-- Icon injected via JS -->
-                        Hyrox-Hybrid
+                        Hyrox-Calisthenics-Hybrid-Plan
                     </h1>
-                    <p class="text-slate-400 text-[10px] mt-0.5 font-mono uppercase tracking-wider">Berlin • Single Open</p>
+                    <p class="text-zinc-400 text-[10px] mt-0.5 font-mono uppercase tracking-wider">Berlin • Single Open</p>
                 </div>
                 <!-- Tabs -->
-                <div class="flex bg-slate-900 p-1 rounded-lg border border-slate-700">
+                <div class="flex bg-zinc-900 p-1 rounded-lg border border-zinc-700 shrink-0">
                     <button onclick="app.setTab('plan')" id="btn-plan" class="btn btn-active">Training</button>
                     <button onclick="app.setTab('stats')" id="btn-stats" class="btn btn-inactive">Statistik</button>
                 </div>
@@ -44,17 +44,61 @@
         </div>
     </div>
 
-    <!-- Error Container (Hidden by default) -->
+    <!-- Error Container -->
     <div id="error-container" class="hidden p-4 bg-red-900/50 text-red-200 m-4 rounded border border-red-500 text-xs font-mono"></div>
 
     <!-- Main Content -->
     <div id="app-container" class="max-w-3xl mx-auto p-4 mt-2">
-        <div class="text-center text-slate-500 mt-10">Lade Plan...</div>
+        <div class="text-center text-zinc-500 mt-10">Lade Plan...</div>
+    </div>
+
+    <!-- Floating Timer -->
+    <div class="fixed bottom-6 right-4 bg-zinc-800 border border-zinc-600 rounded-full shadow-2xl p-1.5 flex items-center gap-2 z-50">
+        <span id="timer-display" class="font-mono text-xl font-bold text-yellow-500 ml-3 w-16 text-center">00:00</span>
+        <button onclick="TimerUI.toggle()" id="timer-btn" class="bg-yellow-500 text-zinc-900 rounded-full p-2.5 transition-transform active:scale-95">
+            <span id="timer-icon"></span>
+        </button>
+        <button onclick="TimerUI.reset()" class="text-zinc-400 p-2.5 hover:text-white transition-colors">
+            <span id="timer-reset-icon"></span>
+        </button>
+    </div>
+
+    <!-- Add Custom Exercise Modal -->
+    <div id="custom-ex-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/80 modal-bg p-4">
+        <div class="bg-zinc-800 border border-zinc-600 rounded-xl p-6 w-full max-w-sm shadow-2xl">
+            <h3 class="text-lg font-bold text-yellow-500 mb-4">Eigene Übung hinzufügen</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs text-zinc-400 uppercase font-bold mb-1 block">Übungsname</label>
+                    <input type="text" id="modal-ex-name" class="input-dark text-sm" placeholder="z.B. Bicep Curls">
+                </div>
+                <div>
+                    <label class="text-xs text-zinc-400 uppercase font-bold mb-1 block">Details (optional)</label>
+                    <input type="text" id="modal-ex-details" class="input-dark text-sm" placeholder="z.B. 3x10 pro Arm">
+                </div>
+                <div>
+                    <label class="text-xs text-zinc-400 uppercase font-bold mb-1 block">Tracking Art</label>
+                    <select id="modal-ex-tracking" class="input-dark text-sm">
+                        <option value="none">Kein Tracking</option>
+                        <option value="weight_reps">Gewicht & Wiederholungen</option>
+                        <option value="time">Zeit (Dauer)</option>
+                        <option value="dist">Distanz</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="app.closeModal()" class="px-4 py-2 rounded text-sm font-bold text-zinc-400 hover:text-white">Abbrechen</button>
+                <button onclick="app.saveCustomExercise()" class="px-4 py-2 rounded text-sm font-bold bg-yellow-500 text-zinc-900">Hinzufügen</button>
+            </div>
+            <input type="hidden" id="modal-day-idx">
+        </div>
     </div>
 
     <!-- JavaScript Logic -->
     <script>
-        // --- ICONS (SVG Strings directly embedded to avoid loading external libs) ---
+        // --- ICONS ---
         const ICONS = {
             trophy: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-yellow-500"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>`,
             timer: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>`,
@@ -66,11 +110,52 @@
             chevronRight: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>`,
             chevronDown: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`,
             chevronUp: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>`,
-            barChart: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></svg>`
+            barChart: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></svg>`,
+            play: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>`,
+            pause: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`,
+            reset: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>`,
+            plus: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`
+        };
+
+        // --- TIMER LOGIC ---
+        const TimerUI = {
+            interval: null,
+            seconds: 0,
+            running: false,
+            init() {
+                document.getElementById('timer-icon').innerHTML = ICONS.play;
+                document.getElementById('timer-reset-icon').innerHTML = ICONS.reset;
+            },
+            toggle() {
+                const iconContainer = document.getElementById('timer-icon');
+                if (this.running) {
+                    clearInterval(this.interval);
+                    this.running = false;
+                    iconContainer.innerHTML = ICONS.play;
+                } else {
+                    this.running = true;
+                    iconContainer.innerHTML = ICONS.pause;
+                    this.interval = setInterval(() => {
+                        this.seconds++;
+                        document.getElementById('timer-display').innerText = this.format(this.seconds);
+                    }, 1000);
+                }
+            },
+            reset() {
+                clearInterval(this.interval);
+                this.running = false;
+                this.seconds = 0;
+                document.getElementById('timer-display').innerText = "00:00";
+                document.getElementById('timer-icon').innerHTML = ICONS.play;
+            },
+            format(sec) {
+                const m = Math.floor(sec / 60);
+                const s = sec % 60;
+                return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            }
         };
 
         // --- DATA & CONFIG ---
-        
         const METRICS = {
             pace:     { label: 'Pace', unit: 'min/km', type: 'text', width: 'w-24' },
             weight:   { label: 'Last', unit: 'kg', type: 'number', width: 'w-20' },
@@ -80,7 +165,7 @@
         };
 
         const STAT_OPTIONS = [
-            { value: 'run_pace', label: 'Lauf Pace', unit: 'min/km', color: '#3b82f6' },
+            { value: 'run_pace', label: 'Lauf Pace', unit: 'min/km', color: '#e4e4e7' }, // Light gray instead of blue
             { value: 'sq_vol', label: 'Squat Volumen (kg*wdh)', unit: 'kg', color: '#f97316' },
             { value: 'dl_vol', label: 'Deadlift Volumen', unit: 'kg', color: '#ef4444' },
             { value: 'pull_vol', label: 'Pull-Up Volumen', unit: 'kg', color: '#a855f7' },
@@ -91,7 +176,6 @@
         ];
 
         // --- HELPER FUNCTIONS ---
-
         function getPhaseForWeek(week) {
             if (week <= 4) return { name: "Phase 1: Base & Strength", focus: "Fundament bauen. Schwere Gewichte." };
             if (week <= 8) return { name: "Phase 2: Specificity", focus: "Intensität hoch, Pausen runter." };
@@ -119,32 +203,73 @@
             return `${m}:${s < 10 ? '0' : ''}${s}`;
         }
 
-        // --- SAFE STORAGE WRAPPER ---
-        // Prevents crashes on private mode or restricted file access
+        // --- DATE CALCULATIONS ---
+        function getPlanDates() {
+            const currentYear = new Date().getFullYear();
+            const raceDate = new Date(currentYear, 4, 22); // 22. Mai
+            
+            const startDate = new Date(raceDate);
+            startDate.setDate(raceDate.getDate() - 83); // 12 weeks
+            
+            return { startDate, raceDate };
+        }
+
+        function getDatesForWeek(week) {
+            const { startDate } = getPlanDates();
+            const weekStart = new Date(startDate);
+            weekStart.setDate(startDate.getDate() + (week - 1) * 7);
+            
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+            
+            const formatDate = (d) => {
+                const day = String(d.getDate()).padStart(2, '0');
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                return `${day}.${month}.`;
+            };
+            
+            return `${formatDate(weekStart)} – ${formatDate(weekEnd)}`;
+        }
+
+        function getCurrentRealWeek() {
+            const { startDate } = getPlanDates();
+            const today = new Date();
+            
+            today.setHours(0,0,0,0);
+            const start = new Date(startDate);
+            start.setHours(0,0,0,0);
+            
+            const diffTime = today.getTime() - start.getTime();
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            let week = Math.floor(diffDays / 7) + 1;
+            if (week < 1) return 1;
+            if (week > 12) return 12;
+            return week;
+        }
+
         const SafeStorage = {
             getItem(key) {
-                try { return localStorage.getItem(key); } catch(e) { console.warn('Storage read failed', e); return null; }
+                try { return localStorage.getItem(key); } catch(e) { return null; }
             },
             setItem(key, val) {
-                try { localStorage.setItem(key, val); } catch(e) { console.warn('Storage write failed', e); }
+                try { localStorage.setItem(key, val); } catch(e) {}
             }
         };
 
         // --- WORKOUT DATA GENERATOR ---
-
         function getWorkoutsForWeek(week) {
             const createEx = (name, details, inputs = []) => ({ name, details, inputs });
             
-            // Reusable Input Definitions
             const iRunPace  = [{ id: 'run_pace', ...METRICS.pace, placeholder: '04:15' }];
             const iPullUps  = [{ id: 'pull_w', ...METRICS.weight, placeholder: '10' }, { id: 'pull_r', ...METRICS.reps, placeholder: '5' }];
             const iDips     = [{ id: 'dip_w', ...METRICS.weight, placeholder: '15' }, { id: 'dip_r', ...METRICS.reps, placeholder: '5' }];
             const iRows     = [{ id: 'row_w', ...METRICS.weight, placeholder: 'BW' }, { id: 'row_r', ...METRICS.reps, placeholder: '8' }];
             
             const iWedRun   = [{ id: 'wed_run_t', ...METRICS.time, placeholder: '05:00' }];
-            const iSledPush = [{ id: 'spush_w', ...METRICS.weight, placeholder: '152' }, { id: 'spush_t', ...METRICS.time, placeholder: '02:30' }];
-            const iSledPull = [{ id: 'spull_w', ...METRICS.weight, placeholder: '103' }, { id: 'spull_t', ...METRICS.time, placeholder: '03:00' }];
-            const iLunges   = [{ id: 'lng_w', ...METRICS.weight, placeholder: '20' }, { id: 'lng_t', ...METRICS.time, placeholder: '02:00' }];
+            const iSledPush = [{ id: 'spush_t', ...METRICS.time, placeholder: '02:30' }];
+            const iSledPull = [{ id: 'spull_t', ...METRICS.time, placeholder: '03:00' }];
+            const iLunges   = [{ id: 'lng_t', ...METRICS.time, placeholder: '02:00' }];
             
             const iZone2    = [{ id: 'z2_dist', ...METRICS.dist, placeholder: '10' }, { id: 'z2_time', ...METRICS.time, placeholder: '60:00' }];
             const iSquat    = [{ id: 'sq_w', ...METRICS.weight, placeholder: '80' }, { id: 'sq_r', ...METRICS.reps, placeholder: '5' }];
@@ -153,9 +278,7 @@
             const iWallBallTime = [{ id: 'wb_t', ...METRICS.time, placeholder: '01:30' }];
             const iDeadlift = [{ id: 'dl_w', ...METRICS.weight, placeholder: '100' }, { id: 'dl_r', ...METRICS.reps, placeholder: '5' }];
             const iCarry    = [{ id: 'cry_w', ...METRICS.weight, placeholder: '24' }, { id: 'cry_dist', ...METRICS.dist, placeholder: '0.04' }];
-            const iKaren    = [{ id: 'karen_t', ...METRICS.time, placeholder: '05:00' }];
 
-            // --- PHASE 1 ---
             if (week <= 4) {
                 const intervalCount = week <= 2 ? "5x" : "6x";
                 return [
@@ -163,7 +286,6 @@
                         createEx("Intervalle", `${intervalCount} 1000m @ Threshold. Pause 2:00 min.`, iRunPace)
                     ]},
                     { day: "Di", title: "Cali Strength (Upper)", icon: "dumbbell", exercises: [
-                        createEx("Skill Practice", "20 min Handstand / Front Lever.", []),
                         createEx("A1: Weighted Pull-Ups", "5x5 (RPE 8). Pause 90s.", iPullUps),
                         createEx("A2: Weighted Dips", "5x5. Pause 90s.", iDips),
                         createEx("B1: FL Rows", "4x8-10. Pause 60s.", iRows)
@@ -189,19 +311,16 @@
                     { day: "So", title: "Rest Day", icon: "info", exercises: [createEx("Recovery", "Mobility.")] }
                 ];
             }
-            // --- PHASE 2 ---
             if (week <= 8) {
                 return [
                     { day: "Mo", title: "Rochade Intervals", icon: "timer", exercises: [
                         createEx("4 Runden", "1k Race Pace + Burpees/WB. Pause 2 min.", iRunPace)
                     ]},
                     { day: "Di", title: "Cali Variation", icon: "dumbbell", exercises: [
-                        createEx("Skill Practice", "Wie Phase 1.", []),
                         createEx("Explosive Pull-Ups", "5x5 (Speed!).", iPullUps),
                         createEx("Ring Dips", "5x5 (Stabilität).", iDips)
                     ]},
                     { day: "Mi", title: "Sim 'The Sandwich'", icon: "activity", exercises: [
-                        createEx("Ablauf", "1k Run -> 1k Ski -> 1k Run -> Push -> 1k Run -> Pull -> 1k Run", []),
                         createEx("Sled Push", "50m (152kg)", iSledPush),
                         createEx("Sled Pull", "50m (103kg)", iSledPull)
                     ]},
@@ -210,14 +329,12 @@
                     ]},
                     { day: "Fr", title: "Heavy Carries & WB", icon: "dumbbell", exercises: [
                         createEx("Deadlift", "3x3-5 (RPE 9).", iDeadlift),
-                        createEx("Farmers Carry", "4x40m (Schwer!).", iCarry),
-                        createEx("Finisher (75 WB)", "Zeit stoppen.", iKaren)
+                        createEx("Farmers Carry", "4x40m (Schwer!).", iCarry)
                     ]},
                     { day: "Sa", title: "Cali Community", icon: "users", exercises: [createEx("Freies Training", "Park.")] },
                     { day: "So", title: "Rest Day", icon: "info", exercises: [createEx("Recovery", "Mobility.")] }
                 ];
             }
-            // --- PHASE 3 ---
             return [
                 { day: "Mo", title: week === 12 ? "Taper Sprints" : "Intervals Peak", icon: "timer", exercises: [createEx("Laufen", "Intensität hoch.", iRunPace)] },
                 { day: "Di", title: "Skill Flow", icon: "dumbbell", exercises: [createEx("Skill", "Leicht, 'Flow'.", [])] },
@@ -230,35 +347,43 @@
         }
 
         // --- APP LOGIC ---
-
         const app = {
             currentWeek: 1,
             totalWeeks: 12,
             activeTab: 'plan',
+            viewMode: 'day',
+            currentDayIdx: 0,
             expandedDay: null,
             logs: {},
+            customEx: {}, 
             selectedStat: 'run_pace',
 
             init() {
                 try {
-                    // Inject Header Icon
                     document.getElementById('header-title').insertAdjacentHTML('afterbegin', ICONS.trophy);
+                    TimerUI.init();
 
-                    // Load logs
-                    const saved = SafeStorage.getItem('hyrox_logs');
-                    if (saved) this.logs = JSON.parse(saved);
+                    const savedLogs = SafeStorage.getItem('hyrox_logs');
+                    if (savedLogs) this.logs = JSON.parse(savedLogs);
                     
-                    // Load last state
+                    const savedCustom = SafeStorage.getItem('hyrox_custom');
+                    if (savedCustom) this.customEx = JSON.parse(savedCustom);
+                    
                     const savedState = SafeStorage.getItem('hyrox_state');
                     if (savedState) {
                         const state = JSON.parse(savedState);
-                        this.currentWeek = state.currentWeek || 1;
-                        this.activeTab = state.activeTab || 'plan';
+                        // Immer mit "plan" Tab starten für bessere UX auf dem iPhone
+                        this.activeTab = 'plan'; 
                     }
+                    
+                    // Berechne aktuelles Datum und Wochentag
+                    this.currentWeek = getCurrentRealWeek();
+                    // JS getDay(): 0=Sonntag, 1=Montag. Unser Array: 0=Montag, 6=Sonntag
+                    this.currentDayIdx = (new Date().getDay() + 6) % 7;
+                    this.viewMode = 'day'; // Immer in der Tagesansicht starten!
 
                     this.render();
                 } catch (e) {
-                    console.error("Critical Init Error:", e);
                     document.getElementById('error-container').innerText = "Fehler beim Laden: " + e.message;
                     document.getElementById('error-container').classList.remove('hidden');
                 }
@@ -266,25 +391,24 @@
 
             save() {
                 SafeStorage.setItem('hyrox_logs', JSON.stringify(this.logs));
+                SafeStorage.setItem('hyrox_custom', JSON.stringify(this.customEx));
                 SafeStorage.setItem('hyrox_state', JSON.stringify({
                     currentWeek: this.currentWeek,
-                    activeTab: this.activeTab
+                    activeTab: this.activeTab,
+                    viewMode: this.viewMode
                 }));
             },
 
             setTab(tab) {
                 this.activeTab = tab;
-                const btnPlan = document.getElementById('btn-plan');
-                const btnStats = document.getElementById('btn-stats');
-                
-                if (tab === 'plan') {
-                    btnPlan.className = "btn btn-active";
-                    btnStats.className = "btn btn-inactive";
-                } else {
-                    btnPlan.className = "btn btn-inactive";
-                    btnStats.className = "btn btn-active";
-                }
-                
+                document.getElementById('btn-plan').className = tab === 'plan' ? "btn btn-active" : "btn btn-inactive";
+                document.getElementById('btn-stats').className = tab === 'stats' ? "btn btn-active" : "btn btn-inactive";
+                this.save();
+                this.render();
+            },
+
+            setViewMode(mode) {
+                this.viewMode = mode;
                 this.save();
                 this.render();
             },
@@ -299,7 +423,13 @@
                 }
             },
 
+            setDay(idx) {
+                this.currentDayIdx = idx;
+                this.render();
+            },
+
             toggleExpand(dayIdx) {
+                if (this.viewMode === 'day') return; // In Tagesansicht immer offen
                 this.expandedDay = this.expandedDay === dayIdx ? null : dayIdx;
                 this.render();
             },
@@ -315,78 +445,194 @@
                 this.render();
             },
 
-            render() {
-                try {
-                    const container = document.getElementById('app-container');
-                    container.innerHTML = '';
+            // --- CUSTOM EXERCISE LOGIC ---
+            showCustomExModal(dayIdx) {
+                document.getElementById('modal-day-idx').value = dayIdx;
+                document.getElementById('modal-ex-name').value = '';
+                document.getElementById('modal-ex-details').value = '';
+                document.getElementById('modal-ex-tracking').value = 'none';
+                document.getElementById('custom-ex-modal').classList.remove('hidden');
+            },
+            
+            closeModal() {
+                document.getElementById('custom-ex-modal').classList.add('hidden');
+            },
 
-                    if (this.activeTab === 'plan') {
-                        this.renderPlan(container);
-                    } else {
-                        this.renderStats(container);
-                    }
-                } catch (e) {
-                    console.error("Render Error:", e);
-                    document.getElementById('error-container').innerText = "Render Fehler: " + e.message;
-                    document.getElementById('error-container').classList.remove('hidden');
+            saveCustomExercise() {
+                const dayIdx = document.getElementById('modal-day-idx').value;
+                const name = document.getElementById('modal-ex-name').value.trim();
+                const details = document.getElementById('modal-ex-details').value.trim();
+                const trackingType = document.getElementById('modal-ex-tracking').value;
+
+                if (!name) return alert("Bitte einen Übungsnamen eingeben.");
+
+                const uniqueId = 'c_' + Date.now();
+                const key = `${this.currentWeek}-${dayIdx}`;
+                
+                if (!this.customEx[key]) this.customEx[key] = [];
+                
+                this.customEx[key].push({
+                    id: uniqueId,
+                    name: name,
+                    details: details,
+                    trackingType: trackingType
+                });
+
+                this.save();
+                this.closeModal();
+                this.render();
+            },
+
+            getCustomInputsDef(trackingType, uniqueId) {
+                if (trackingType === 'weight_reps') {
+                    return [
+                        { id: `${uniqueId}_w`, label: 'Last', unit: 'kg', type: 'number', width: 'w-20' },
+                        { id: `${uniqueId}_r`, label: 'Wdh.', unit: 'x', type: 'number', width: 'w-16' }
+                    ];
+                } else if (trackingType === 'time') {
+                    return [ { id: `${uniqueId}_t`, label: 'Zeit', unit: 'mm:ss', type: 'text', width: 'w-24' } ];
+                } else if (trackingType === 'dist') {
+                    return [ { id: `${uniqueId}_d`, label: 'Dist.', unit: 'km', type: 'number', width: 'w-20' } ];
                 }
+                return [];
+            },
+
+            // --- PREDICTION ALGORITHM ---
+            getRacePrediction() {
+                let paceSec = 300; 
+                let pushSec = 180; 
+                let pullSec = 240; 
+                let lungeSec = 240; 
+                let wbSec = 270; 
+                let rowSec = 240; 
+
+                let hasData = false;
+                for (let w = 1; w <= this.currentWeek; w++) {
+                    const findV = (suffix) => {
+                        const key = Object.keys(this.logs).find(k => k.startsWith(`${w}-`) && k.endsWith(`-${suffix}`));
+                        return key ? this.logs[key] : null;
+                    };
+                    
+                    if (findV('run_pace')) { paceSec = timeToSeconds(findV('run_pace')); hasData = true; }
+                    if (findV('spush_t')) { pushSec = timeToSeconds(findV('spush_t')); hasData = true; }
+                    if (findV('spull_t')) { pullSec = timeToSeconds(findV('spull_t')); hasData = true; }
+                    if (findV('lng_t')) { lungeSec = timeToSeconds(findV('lng_t')); hasData = true; }
+                    if (findV('wb_t')) { wbSec = timeToSeconds(findV('wb_t')); hasData = true; }
+                    if (findV('row_t')) { rowSec = timeToSeconds(findV('row_t')); hasData = true; }
+                }
+
+                if (!hasData) return "Keine Daten";
+
+                const totalRun = paceSec * 8; 
+                const roxzone = 420; 
+                const skiAndBurpeesAndFarmers = 240 + 270 + 120; 
+                
+                const stationsSum = (pushSec + pullSec + lungeSec + wbSec + rowSec + skiAndBurpeesAndFarmers) * 1.1;
+
+                const totalEstimatedSeconds = totalRun + roxzone + stationsSum;
+                
+                const h = Math.floor(totalEstimatedSeconds / 3600);
+                const m = Math.floor((totalEstimatedSeconds % 3600) / 60);
+                const s = Math.round(totalEstimatedSeconds % 60);
+                
+                if (h > 0) return `${h}h ${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
+                return `${m}m ${s.toString().padStart(2, '0')}s`;
+            },
+
+            // --- RENDER ---
+            render() {
+                const container = document.getElementById('app-container');
+                container.innerHTML = '';
+                if (this.activeTab === 'plan') this.renderPlan(container);
+                else this.renderStats(container);
             },
 
             renderPlan(container) {
                 const phase = getPhaseForWeek(this.currentWeek);
-                const workouts = getWorkoutsForWeek(this.currentWeek);
+                const baseWorkouts = getWorkoutsForWeek(this.currentWeek);
 
-                // Phase Card
                 const phaseHTML = `
-                    <div class="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-2xl p-6 mb-6 shadow-lg relative overflow-hidden">
+                    <div class="bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700 rounded-2xl p-6 mb-4 shadow-lg relative overflow-hidden">
                         <div class="absolute top-0 right-0 w-32 h-32 bg-yellow-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
                         <div class="flex justify-between items-start mb-2 relative z-10">
                             <h2 class="text-xl font-bold text-yellow-400">${phase.name}</h2>
-                            <span class="bg-yellow-500/20 text-yellow-400 text-xs font-bold px-3 py-1 rounded-full border border-yellow-500/20">Woche ${this.currentWeek}</span>
+                            <span class="bg-yellow-500/20 text-yellow-400 text-xs font-bold px-3 py-1 rounded-full border border-yellow-500/20 whitespace-nowrap">
+                                Woche ${this.currentWeek}
+                            </span>
                         </div>
-                        <p class="text-slate-300 font-light text-sm relative z-10">${phase.focus}</p>
+                        <p class="text-zinc-300 font-light text-sm relative z-10">${phase.focus}</p>
                     </div>
                 `;
 
-                // Navigation
                 const navHTML = `
-                    <div class="flex justify-between items-center mb-6 bg-slate-800 p-2 rounded-xl border border-slate-700">
-                        <button onclick="app.changeWeek(-1)" ${this.currentWeek === 1 ? 'disabled' : ''} class="p-3 hover:bg-slate-700 rounded-lg disabled:opacity-30 text-white">${ICONS.chevronLeft}</button>
-                        <span class="font-mono font-bold text-lg text-white">Woche ${this.currentWeek}</span>
-                        <button onclick="app.changeWeek(1)" ${this.currentWeek === this.totalWeeks ? 'disabled' : ''} class="p-3 hover:bg-slate-700 rounded-lg disabled:opacity-30 text-white">${ICONS.chevronRight}</button>
+                    <div class="flex justify-between items-center mb-4 bg-zinc-800 p-2 rounded-xl border border-zinc-700">
+                        <button onclick="app.changeWeek(-1)" ${this.currentWeek === 1 ? 'disabled' : ''} class="p-3 hover:bg-zinc-700 rounded-lg disabled:opacity-30 text-white">${ICONS.chevronLeft}</button>
+                        <div class="flex flex-col items-center">
+                            <span class="font-mono font-bold text-lg text-white">Woche ${this.currentWeek}</span>
+                            <span class="text-[10px] text-zinc-400 font-sans tracking-wide">${getDatesForWeek(this.currentWeek)}</span>
+                        </div>
+                        <button onclick="app.changeWeek(1)" ${this.currentWeek === this.totalWeeks ? 'disabled' : ''} class="p-3 hover:bg-zinc-700 rounded-lg disabled:opacity-30 text-white">${ICONS.chevronRight}</button>
                     </div>
                 `;
 
-                // Workouts
+                // View Toggle (Tag / Woche)
+                const viewToggleHTML = `
+                    <div class="flex bg-zinc-900 p-1 rounded-lg border border-zinc-700 mb-6 mx-auto max-w-[200px]">
+                        <button onclick="app.setViewMode('day')" class="flex-1 py-1.5 rounded text-xs font-bold transition-all ${this.viewMode === 'day' ? 'bg-zinc-700 text-white shadow' : 'text-zinc-500 hover:text-zinc-300'}">Tag</button>
+                        <button onclick="app.setViewMode('week')" class="flex-1 py-1.5 rounded text-xs font-bold transition-all ${this.viewMode === 'week' ? 'bg-zinc-700 text-white shadow' : 'text-zinc-500 hover:text-zinc-300'}">Woche</button>
+                    </div>
+                `;
+
+                // Day Selector (Only in Day View)
+                let daySelectorHTML = '';
+                if (this.viewMode === 'day') {
+                    const days = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+                    daySelectorHTML = `
+                        <div class="flex justify-between gap-1 mb-6">
+                            ${days.map((d, i) => `
+                                <button onclick="app.setDay(${i})" class="flex-1 py-2 rounded-lg text-xs font-bold transition-all ${this.currentDayIdx === i ? 'bg-yellow-500 text-zinc-900 shadow-md' : 'bg-zinc-800 text-zinc-400 border border-zinc-700 hover:bg-zinc-700'}">${d}</button>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
                 let workoutsHTML = '<div class="space-y-4">';
-                workouts.forEach((workout, dayIdx) => {
-                    const isExpanded = this.expandedDay === dayIdx;
-                    const hasInput = workout.exercises.some(ex => ex.inputs.length > 0);
-                    const hasData = workout.exercises.some(ex => ex.inputs.some(inp => this.logs[`${this.currentWeek}-${dayIdx}-${inp.id}`]));
+                baseWorkouts.forEach((workout, dayIdx) => {
+                    // Filter für Tagesansicht
+                    if (this.viewMode === 'day' && dayIdx !== this.currentDayIdx) return;
+
+                    // In der Tagesansicht ist die Karte immer offen
+                    const isExpanded = this.viewMode === 'day' ? true : this.expandedDay === dayIdx;
                     
-                    // Icon logic
-                    let iconSvg = "";
-                    if (workout.icon === 'timer') iconSvg = ICONS.timer;
-                    else if (workout.icon === 'dumbbell') iconSvg = ICONS.dumbbell;
-                    else if (workout.icon === 'activity') iconSvg = ICONS.activity;
-                    else if (workout.icon === 'users') iconSvg = ICONS.users;
-                    else if (workout.icon === 'info') iconSvg = ICONS.info;
-                    else if (workout.icon === 'trophy') iconSvg = ICONS.trophy;
+                    const customForDay = this.customEx[`${this.currentWeek}-${dayIdx}`] || [];
+                    const mappedCustom = customForDay.map(c => ({
+                        name: c.name,
+                        details: c.details,
+                        inputs: this.getCustomInputsDef(c.trackingType, c.id)
+                    }));
+                    
+                    const allExercises = [...workout.exercises, ...mappedCustom];
+                    
+                    const hasInput = allExercises.some(ex => ex.inputs.length > 0);
+                    const hasData = allExercises.some(ex => ex.inputs.some(inp => this.logs[`${this.currentWeek}-${dayIdx}-${inp.id}`]));
+                    
+                    let iconSvg = ICONS[workout.icon] || ICONS.activity;
+                    const chevronHtml = this.viewMode === 'day' ? '' : `<div class="text-zinc-500">${isExpanded ? ICONS.chevronUp : ICONS.chevronDown}</div>`;
 
                     workoutsHTML += `
-                        <div class="card bg-slate-800 border ${hasData ? 'border-yellow-500/40' : 'border-slate-700'}">
-                            <div class="p-4 flex items-center gap-4 cursor-pointer hover:bg-slate-700/50" onclick="app.toggleExpand(${dayIdx})">
-                                <div class="p-2 rounded-lg ${hasData ? 'bg-yellow-500 text-slate-900' : 'bg-slate-700 text-slate-400'}">
+                        <div class="card bg-zinc-800 border ${hasData ? 'border-yellow-500/40' : 'border-zinc-700'}">
+                            <div class="p-4 flex items-center gap-4 cursor-pointer hover:bg-zinc-700/50" onclick="app.toggleExpand(${dayIdx})">
+                                <div class="p-2 rounded-lg ${hasData ? 'bg-yellow-500 text-zinc-900' : 'bg-zinc-700 text-zinc-400'}">
                                     ${iconSvg}
                                 </div>
                                 <div class="flex-grow">
                                     <div class="flex justify-between items-center">
-                                        <h3 class="font-bold text-base text-slate-100">${workout.day}: ${workout.title}</h3>
-                                        <div class="text-slate-500">${isExpanded ? ICONS.chevronUp : ICONS.chevronDown}</div>
+                                        <h3 class="font-bold text-base text-zinc-100">${workout.day}: ${workout.title}</h3>
+                                        ${chevronHtml}
                                     </div>
                                     ${!isExpanded ? `
                                         <div class="flex gap-2 mt-1">
-                                            <span class="text-[10px] bg-slate-900 px-2 py-0.5 rounded text-slate-400 uppercase tracking-wider">${workout.exercises.length} Übungen</span>
+                                            <span class="text-[10px] bg-zinc-900 px-2 py-0.5 rounded text-zinc-400 uppercase tracking-wider">${allExercises.length} Übungen</span>
                                             ${hasInput ? '<span class="text-[10px] bg-yellow-900/30 text-yellow-500 px-2 py-0.5 rounded uppercase tracking-wider">Tracking</span>' : ''}
                                         </div>
                                     ` : ''}
@@ -394,11 +640,11 @@
                             </div>
                             
                             ${isExpanded ? `
-                                <div class="border-t border-slate-700/50 bg-slate-900/30">
-                                    ${workout.exercises.map(ex => `
-                                        <div class="p-4 border-b border-slate-700/50 last:border-0">
+                                <div class="border-t border-zinc-700/50 bg-zinc-900/30">
+                                    ${allExercises.map(ex => `
+                                        <div class="p-4 border-b border-zinc-700/50">
                                             <h4 class="font-bold text-yellow-500 text-sm mb-1">${ex.name}</h4>
-                                            <p class="text-sm text-slate-300 leading-snug mb-3">${ex.details}</p>
+                                            ${ex.details ? `<p class="text-sm text-zinc-300 leading-snug mb-3">${ex.details}</p>` : ''}
                                             
                                             ${ex.inputs.length > 0 ? `
                                                 <div class="flex flex-wrap gap-3">
@@ -406,17 +652,17 @@
                                                         const val = this.logs[`${this.currentWeek}-${dayIdx}-${input.id}`] || '';
                                                         return `
                                                             <div class="${input.width || 'w-24'}">
-                                                                <label class="text-[10px] uppercase font-bold text-slate-500 mb-1 block">${input.label}</label>
+                                                                <label class="text-[10px] uppercase font-bold text-zinc-500 mb-1 block">${input.label}</label>
                                                                 <div class="relative">
                                                                     <input 
                                                                         type="${input.type === 'time' ? 'text' : 'number'}" 
                                                                         inputmode="${input.type === 'time' ? 'text' : 'decimal'}"
-                                                                        placeholder="${input.placeholder}"
+                                                                        placeholder="${input.placeholder || ''}"
                                                                         value="${val}"
                                                                         onchange="app.handleInput(${dayIdx}, '${input.id}', this.value)"
                                                                         class="w-full input-dark font-mono text-sm"
                                                                     >
-                                                                    <span class="absolute right-2 top-1.5 text-[10px] text-slate-500 pointer-events-none">${input.unit}</span>
+                                                                    <span class="absolute right-2 top-1.5 text-[10px] text-zinc-500 pointer-events-none">${input.unit}</span>
                                                                 </div>
                                                             </div>
                                                         `;
@@ -425,6 +671,12 @@
                                             ` : ''}
                                         </div>
                                     `).join('')}
+                                    
+                                    <div class="p-4 flex justify-center border-t border-zinc-700/50">
+                                        <button onclick="app.showCustomExModal(${dayIdx})" class="flex items-center gap-1 text-xs font-bold text-yellow-500 hover:text-yellow-400">
+                                            ${ICONS.plus} Eigene Übung hinzufügen
+                                        </button>
+                                    </div>
                                 </div>
                             ` : ''}
                         </div>
@@ -432,7 +684,7 @@
                 });
                 workoutsHTML += '</div>';
 
-                container.innerHTML = phaseHTML + navHTML + workoutsHTML;
+                container.innerHTML = phaseHTML + navHTML + viewToggleHTML + daySelectorHTML + workoutsHTML;
             },
 
             renderStats(container) {
@@ -443,22 +695,34 @@
                     `<option value="${opt.value}" ${this.selectedStat === opt.value ? 'selected' : ''}>${opt.label}</option>`
                 ).join('');
 
+                const prediction = this.getRacePrediction();
+
                 container.innerHTML = `
-                    <div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl shadow-xl">
+                    <div class="bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 border border-yellow-500/30 p-5 rounded-xl mb-6 flex items-center gap-4 shadow-lg">
+                        <div class="bg-yellow-500/20 p-3 rounded-full text-yellow-500">
+                            ${ICONS.trophy}
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Errechnete Race Prognose</p>
+                            <h4 class="text-2xl font-bold text-yellow-400 mt-0.5">${prediction}</h4>
+                            <p class="text-[10px] text-zinc-500 mt-1">Basierend auf deinen Paces & Zeiten</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-zinc-800 border border-zinc-700 p-6 rounded-2xl shadow-xl">
                         <div class="flex flex-col gap-4 mb-6">
                             <div class="flex items-center gap-2 text-white">
                                 ${ICONS.barChart}
                                 <h3 class="text-lg font-bold">Fortschritt</h3>
                             </div>
-                            <select onchange="app.setStat(this.value)" class="bg-slate-900 text-white border border-slate-600 rounded px-3 py-2 text-sm font-bold w-full">
+                            <select onchange="app.setStat(this.value)" class="bg-zinc-900 text-white border border-zinc-600 rounded px-3 py-2 text-sm font-bold w-full">
                                 ${optionsHTML}
                             </select>
                         </div>
                         
-                        <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700/50">
+                        <div class="bg-zinc-900/50 p-4 rounded-xl border border-zinc-700/50">
                             ${this.renderChart(chartData, currentConfig)}
                         </div>
-                        <p class="text-xs text-slate-500 mt-4 text-center">Zeiten als MM:SS oder Sekunden eingeben.</p>
                     </div>
                 `;
             },
@@ -497,7 +761,7 @@
             },
 
             renderChart(data, config) {
-                if (data.length < 2) return '<div class="text-slate-500 text-xs p-8 text-center">Benötige mind. 2 Einträge für Grafik.</div>';
+                if (data.length < 2) return '<div class="text-zinc-500 text-xs p-8 text-center">Benötige mind. 2 Einträge für Grafik.</div>';
 
                 const height = 200;
                 const width = 600;
@@ -518,21 +782,21 @@
                 return `
                     <div class="relative w-full aspect-[3/1] min-h-[150px]">
                         <div class="flex justify-between items-end mb-2 absolute -top-8 w-full">
-                            <span class="text-xs text-slate-400 font-mono">${config.unit}</span>
+                            <span class="text-xs text-zinc-400 font-mono">${config.unit}</span>
                         </div>
                         <svg viewBox="0 0 ${width} ${height}" class="w-full h-full overflow-visible">
                             ${[0, 0.5, 1].map(pct => {
                                 const yVal = minY + (maxY - minY) * pct;
                                 const yPos = getY(yVal);
-                                return `<line x1="${padding}" y1="${yPos}" x2="${width - padding}" y2="${yPos}" stroke="#334155" stroke-width="1" stroke-dasharray="4 4" />
-                                        <text x="${padding - 10}" y="${yPos + 4}" text-anchor="end" fill="#64748b" font-size="10">${formatY(yVal)}</text>`;
+                                return `<line x1="${padding}" y1="${yPos}" x2="${width - padding}" y2="${yPos}" stroke="#3f3f46" stroke-width="1" stroke-dasharray="4 4" />
+                                        <text x="${padding - 10}" y="${yPos + 4}" text-anchor="end" fill="#a1a1aa" font-size="10">${formatY(yVal)}</text>`;
                             }).join('')}
                             
                             <polyline fill="none" stroke="${config.color}" stroke-width="3" points="${points}" stroke-linecap="round" stroke-linejoin="round" />
                             
                             ${data.map(d => `
-                                <circle cx="${getX(d.week)}" cy="${getY(d.value)}" r="5" fill="#1e293b" stroke="${config.color}" stroke-width="2" />
-                                <text x="${getX(d.week)}" y="${height - 10}" text-anchor="middle" fill="#94a3b8" font-size="10">W${d.week}</text>
+                                <circle cx="${getX(d.week)}" cy="${getY(d.value)}" r="5" fill="#18181b" stroke="${config.color}" stroke-width="2" />
+                                <text x="${getX(d.week)}" y="${height - 10}" text-anchor="middle" fill="#a1a1aa" font-size="10">W${d.week}</text>
                             `).join('')}
                         </svg>
                     </div>
@@ -540,7 +804,6 @@
             }
         };
 
-        // Start App
         window.onload = function() {
             app.init();
         };
